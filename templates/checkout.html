@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resumen del pedido</title>
+    <link rel="icon" type="image/x-icon" href="../static/images/calve_sol_favicon.jpg">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/styles.css') }}">
+</head>
+<body>
+    {% include 'cabecera.html' %}
+
+    <div class="main-content container my-4">
+
+        {% if partituras %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Partitura</th>
+                            <th>Precio</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in partituras %}
+                        <tr>
+                            <td>{{ p.nombre }}</td>
+                            <td>{{ p.precio }}€</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <a href="{{url_for('ver_carrito')}}" class="btn btn-danger">
+                    <i class="bi bi-trash3"></i> Cancelar
+                </a>
+                <div class="d-flex align-items-center">
+                    <h4 class="me-3">Total: <span class="text-success">{{ total_compra }}€</span></h4>
+                    <form method="POST" class="m-0">
+                        <button type="submit" class="btn btn-success btn-lg">Proceder al pago</button>
+                    </form>
+                </div>
+            </div>
+        {% else %}
+            <p class="text-center text-muted fst-italic mt-5">No hay productos en tu carrito.</p>
+        {% endif %}
+    </div>
+
+    {% include 'footer.html' %}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

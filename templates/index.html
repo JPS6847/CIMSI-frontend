@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tienda Partituras</title>
+    <link rel="icon" type="image/x-icon" href="../static/images/calve_sol_favicon.jpg">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/styles.css') }}">
+</head>
+
+<body>
+
+    {% include 'cabecera.html' %}
+
+    <div class="container">
+
+        <div class="hero-box text-center mt-5">
+            <h1 class="fw-bold">Tienda de Partituras</h1>
+            <p class="lead mt-3 mb-0">
+                Descubre partituras nuevas subidas por otros músicos como tú.
+            </p>
+        </div>
+
+        <!-- LISTA DE PARTITURAS -->
+        <h3 class="mt-5 mb-5">Subidas recientes</h3>
+
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            {% if partituras %}
+                {% for partitura in partituras %}
+                    <div class="col">
+                        <div class="card h-100 shadow-sm border-0 rounded-3">
+                            <a href="{{ url_for('detalle_partitura', partitura_id=partitura.id) }}">
+                                <img src="{{ url_for('static', filename=partitura.thumbnail_url) }}"
+                                    class="card-img-top"
+                                    style="height: 230px; object-fit: cover; border-radius: 0.5rem 0.5rem 0 0;">
+                            </a>
+
+                            <div class="card-body">
+                                <h5 class="card-title fw-bold">{{ partitura.nombre }}</h5>
+
+                                <p class="text-primary fw-semibold mb-2">
+                                    <i class="bi bi-tag-fill"></i> {{ partitura.precio }}€
+                                </p>
+
+                                <p class="text-muted m-0" style="font-size: 0.9rem;">
+                                    Subida el: {{ partitura.fecha.strftime('%d/%m/%Y') }}
+                                </p>
+
+                                <p class="text-muted" style="font-size: 0.9rem;">
+                                    Por {{ partitura.nombreUsuario }}
+                                    <img src="{{ url_for('static', filename=partitura.fotoPerfil) }}"
+                                        class="rounded-circle ms-2"
+                                        style="width: 30px; height: 30px; object-fit: cover;">
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted fst-italic">No se han subido partituras en los últimos 3 días.</p>
+            {% endif %}
+        </div>
+
+    </div>
+
+    {% include 'footer.html' %}
+</body>
+</html>

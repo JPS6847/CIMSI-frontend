@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ partitura.nombre }}</title>
+    <link rel="icon" type="image/x-icon" href="../static/images/calve_sol_favicon.jpg">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/styles.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+    {% include 'cabecera.html' %}
+
+    <div class="main-content container my-4">
+        <div class="row g-4">
+
+            <!-- IMAGEN -->
+            <div class="col-md-6 d-flex justify-content-center align-items-center">
+                {% if partitura.thumbnail_url %}
+                    <img src="{{ url_for('static', filename=partitura.thumbnail_url) }}" 
+                        class="img-fluid border rounded" alt="Thumbnail PDF">
+                {% else %}
+                    <p class="text-center text-muted">PDF sin thumbnail</p>
+                {% endif %}
+            </div>
+
+            <!-- INFO -->
+            <div class="col-md-6">
+                <h2 class="text-center p-3 border rounded titulo-imagen">{{ partitura.nombre }}</h2>
+                <p class="text-center mt-3">{{ partitura.descripcion }}</p>
+                <h5 class="text-center text-success mt-2">{{ partitura.precio }}€</h5>
+                <p class="text-center text-muted">Subida por: <strong>{{ partitura.nombreUsuario }}</strong></p>
+                <p class="text-center text-muted">Fecha: {{ partitura.fecha.strftime('%d/%m/%Y') }}</p>
+
+                {% if 'usuario_id' in session %}
+                    <div class="d-flex justify-content-center gap-3 mt-3">
+                        {% if usuario_ha_comprado %}
+                            <a href="{{ url_for('descargar', partitura_id=partitura.id) }}" class="btn btn-success btn-lg">
+                                <i class="bi bi-download me-1"></i> Descargar PDF
+                            </a>
+                        {% else %}
+                            <p class="text-danger fst-italic">Debes comprar esta partitura para descargarla.</p>
+                        {% endif %}
+
+                        <a href="{{ url_for('agregar_al_carrito', partitura_id=partitura.id) }}" class="btn btn-primary btn-lg">
+                            <i class="bi bi-cart3 me-1"></i> Añadir al carrito
+                        </a>
+                    </div>
+
+                    <!-- FORMULARIO VALORACIÓN -->
+                    <h5 class="text-center p-2 border rounded bg-info mt-4">¡Deja una valoración!</h5>
+                    <form action="{{ url_for('valorar', partitura_id=partitura.id) }}" method="POST">
+                        <div class="mb-3">
+                            <label for="numEstrellas" class="form-label">Número de estrellas</label>
+                            <select name="numEstrellas" id="numEstrellas" class="form-select" required>
+                                <option value="">Seleccionar:</option>
+                                <option value="1">★</option>
+                                <option value="2">★★</option>
+                                <option value="3">★★★</option>
+                                <option value="4">★★★★</option>
+                                <option value="5">★★★★★</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="comentario" class="form-label">Comentario (opcional)</label>
+                            <textarea name="comentario" id="comentario" class="form-control" rows="3"
+                                    placeholder="Escribe tu comentario aquí..."></textarea>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-lg">Enviar valoración</button>
+                        </div>
+                    </form>
+
+                {% else %}
+                    <p class="text-center text-danger fst-italic mt-3">
+                        Debes iniciar sesión para comprar esta partitura.
+                    </p>
+                {% endif %}
+            </div>
+
+            <!-- RESEÑAS -->
+            <div class="col-12 mt-5">
+                <h5 class="border rounded color-resenya text-center p-2 mb-3">Reseñas</h5>
+
+                <!-- FILTRO -->
+                <div class="container">
+                    <form method="GET" class="mb-4 d-flex justify-content-center align-items-center gap-2">
+                        <label>Mostrar comentarios de:</label>
+                        <select name="estrellas" class="form-select w-auto">
+                            <option value="">Todas</option>
+                            {% for s in [5,4,3,2,1] %}
+                                <option value="{{s}}" {% if request.args.get('estrellas') == s|string %}selected{% endif %}>
+                                    {{ "★" * s }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <button class="btn btn-primary"><i class="bi bi-funnel-fill"></i> Filtrar</button>
+                    </form>
+                </div>
+
+                <!-- LISTA DE RESEÑAS -->
+                <!-- (coloca esto en la sección RESEÑAS de imagen.html donde corresponda) -->
+
+                {% if comentarios_valoraciones %}
+                    {% for item in comentarios_valoraciones %}
+                        <div class="mb-3 p-3 border rounded shadow-sm">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <strong>{{ item['nombreUsuario'] }}</strong>
+                                    <div class="d-inline-block ms-2">
+                                        {% for i in range(1,6) %}
+                                            {% if i <= item['numEstrellas'] %}
+                                                <i class="bi bi-star-fill text-warning"></i>
+                                            {% else %}
+                                                <i class="bi bi-star text-warning"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <small class="text-muted fst-italic">
+                                    {% if item.get('fecha') %}{{ item['fecha'].strftime('%d/%m/%Y') }}{% endif %}
+                                </small>
+                            </div>
+
+                            {% if item.get('texto') %}
+                                <p class="ms-2 mt-2">{{ item['texto'] }}</p>
+                            {% endif %}
+
+                            <div class="d-flex gap-3 mt-2 align-items-center">
+                                {% if 'usuario_id' in session %}
+                                    <!-- botón mostrar/ocultar formulario de respuesta -->
+                                    <button class="btn btn-link btn-sm p-0" type="button"
+                                            onclick="document.getElementById('form-respuesta-{{ item['id'] }}').classList.toggle('d-none')">
+                                        Responder
+                                    </button>
+                                {% endif %}
+
+                                {% if respuestas and (item['id'] in respuestas) %}
+                                    <button class="btn btn-link btn-sm p-0" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#respuestas-{{ item['id'] }}"
+                                            aria-expanded="false" aria-controls="respuestas-{{ item['id'] }}">
+                                        Ver respuestas ({{ respuestas[item['id']]|length }})
+                                    </button>
+                                {% endif %}
+                            </div>
+
+                            <!-- formulario respuesta (inicialmente oculto) -->
+                            {% if 'usuario_id' in session %}
+                                <form id="form-respuesta-{{ item['id'] }}" class="d-none mt-2"
+                                    action="{{ url_for('responder_comentario', comentario_id=item['id']) }}" method="POST">
+                                    <textarea name="texto_respuesta" rows="2" class="form-control mb-2"
+                                            placeholder="Escribe tu respuesta..." required></textarea>
+                                    <div class="d-flex gap-2">
+                                        <button class="btn btn-primary btn-sm" type="submit">Enviar</button>
+                                        <button class="btn btn-secondary btn-sm" type="button"
+                                                onclick="document.getElementById('form-respuesta-{{ item['id'] }}').classList.add('d-none')">
+                                            Cancelar
+                                        </button>
+                                    </div>
+                                </form>
+                            {% endif %}
+
+                            <!-- respuestas colapsables -->
+                            {% if respuestas and (item['id'] in respuestas) %}
+                                <div class="collapse mt-2" id="respuestas-{{ item['id'] }}">
+                                    {% for resp in respuestas[item['id']] %}
+                                        <div class="respuesta-container mb-2 p-2 bg-light rounded">
+                                            <div class="d-flex justify-content-between">
+                                                <div><strong>{{ resp['nombreUsuario'] }}</strong></div>
+                                                <small class="text-muted fst-italic">
+                                                    {% if resp.get('fecha') %}{{ resp['fecha'].strftime('%d/%m/%Y') }}{% endif %}
+                                                </small>
+                                            </div>
+                                            <p class="ms-2 mb-1">{{ resp['texto'] }}</p>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-center text-muted fst-italic">Todavía no hay reseñas para esta partitura. ¡Sé tú el primero!</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% include 'footer.html' %}
+</body>
+</html>
