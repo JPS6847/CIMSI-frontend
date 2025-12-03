@@ -19,11 +19,11 @@ STRIPE_PUBLIC_KEY = "pk_test_51STP1iGwh0Yq6j7Kbe0KxPN9tcJiFxyKveX56yPIDhKDkDNXxH
 
 def get_db_connection():
     return pymysql.connect(
-        host='localhost',
+        host='172.16.0.5',
         user='flask_app',
-        port=3307,
+        port=3306,
         password='flask',
-        database='tienda_partituras',
+        database='app_db',
         cursorclass=pymysql.cursors.DictCursor
     )
 
@@ -979,4 +979,5 @@ def descargar_compra(compra_id):
 
 
 if __name__ == '__main__':
+
     app.run(debug=True)
